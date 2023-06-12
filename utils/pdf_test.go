@@ -38,9 +38,17 @@ func TestChangeFileExtension(t *testing.T) {
 
 func TestAddedMetadata(t *testing.T) {
 	err := util.AddedMetadata("../samples/pdf/origin/doc.pdf", &entity.OptionMetadataPDF{
-		Title:   "Test-Tittle",
-		Author:  "Test-Author",
-		Subject: "Test-Subject",
+		Title:   "Test Tittle",
+		Author:  "Test Author",
+		Subject: "Test Subject",
+	})
+
+	assert.NoError(t, err)
+}
+
+func TestAddedKeywords(t *testing.T) {
+	err := util.AddKeywords("../samples/pdf/origin/doc.pdf", &entity.OptionMetadataPDF{
+		Keywords: "Test Keywords",
 	})
 
 	assert.NoError(t, err)

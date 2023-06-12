@@ -52,6 +52,38 @@ func AddedMetadata(filePath string, metadata *entity.OptionMetadataPDF) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// AddKeywords to add keywords into a pdf file.
+func AddKeywords(filePath string, metadata *entity.OptionMetadataPDF) error {
+	errs := removeKeywords(filePath)
+	if errs != nil {
+		return errs
+	}
+
+	command := fmt.Sprintf("pdfcpu keywords add %s '%s'", filePath, metadata.Keywords)
+
+	// Execute the command
+	cmd := exec.Command("sh", "-c", command)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// removeKeywords to remove keywords into a pdf file.
+func removeKeywords(filePath string) error {
+	command := fmt.Sprintf("pdfcpu key remove '%s'", filePath)
+
+	// Execute the command
+	cmd := exec.Command("sh", "-c", command)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

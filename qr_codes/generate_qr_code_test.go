@@ -1,6 +1,7 @@
 package qr_codes_test
 
 import (
+	"fmt"
 	"go-pdf-generator/qr_codes"
 	"testing"
 
@@ -8,7 +9,10 @@ import (
 )
 
 func TestGenerateQRCode(t *testing.T) {
-	err := qr_codes.QrCodeGen("Example text to create QR Codes", "qrcode-generate.png")
+	key := "simple-go-pdf-generator"
+	text := fmt.Sprintf("https://github.com/akhidnukhlis/simple-go-pdf-generator/%s", key)
+
+	err := qr_codes.QrCodeGen(text, "qrcode-without-icon.png")
 
 	assert.NoError(t, err)
 }

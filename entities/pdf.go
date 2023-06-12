@@ -12,9 +12,10 @@ const (
 
 // OptionMetadataPDF represents options for modifying PDF metadata.
 type OptionMetadataPDF struct {
-	Title   string
-	Author  string
-	Subject string
+	Title    string
+	Author   string
+	Subject  string
+	Keywords string
 }
 
 // OptionFilePDF represents options for working with PDF files.

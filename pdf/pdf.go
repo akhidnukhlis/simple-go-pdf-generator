@@ -27,9 +27,7 @@ type PdfProcessor struct {
 }
 
 // NewPDFGopher constructor to retrieve struct PDFProcessor
-func NewPDFGopher(fileName string, options ...Option) *PdfProcessor {
-	filePath := fmt.Sprintf("../samples/pdf/origin/%v", fileName)
-
+func NewPDFGopher(filePath string, options ...Option) *PdfProcessor {
 	option := &PdfProcessor{
 		FilePath: filePath,
 		OptionFilePDF: &entity.OptionFilePDF{
@@ -135,6 +133,7 @@ func (p *PdfProcessor) pdfToBase64(filePath string) error {
 	if err != nil {
 		return err
 	}
+
 	// Encode the PDF file as base64.
 	base64Output := base64.StdEncoding.EncodeToString(pdfFile)
 	// Set the Base64Output field of the PDFProcessor struct.
@@ -156,6 +155,11 @@ func (p *PdfProcessor) processPDF(filePath string, qrCode string, stampPosition 
 		err := util.AddedMetadata(filePath, p.OptionMetadataPDF)
 		if err != nil {
 			return err
+		}
+
+		errs := util.AddKeywords(filePath, p.OptionMetadataPDF)
+		if errs != nil {
+			return errs
 		}
 	}
 
@@ -195,12 +199,14 @@ func AddQRCodeToPDF(filePath string, qrCodeName string, stampPosition string) er
 	}
 	defer iconFile.Close()
 
-	//fileOutput := fmt.Sprintf("../samples/pdf/out/%s", iconFile.Name())
+	fileOutput := fmt.Sprintf("../samples/pdf/out/doc_out.pdf")
 
-	command := fmt.Sprintf("pdfcpu stamp add -pages even,odd -mode image -- '%s' 'pos:%s, rot:0, ma:0, sc:.1' %s '../samples/pdf/out/out.pdf'", iconFile.Name(), stampPosition, filePath)
+	command := fmt.Sprintf("pdfcpu stamp add -pages even,odd  -mode image -- '%s' 'pos:%s, rot:0, sc:.1' %s %s", iconFile.Name(), stampPosition, filePath, fileOutput)
 
 	// Execute the command
 	cmd := exec.Command("sh", "-c", command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	err = cmd.Run()
 	if err != nil {
@@ -220,8 +226,28 @@ func AddQRCodeToPDF(filePath string, qrCodeName string, stampPosition string) er
 }
 
 // ConvertDocumentToPDF converts a document file to PDF using pdfcpu-cli.
-func ConvertDocumentToPDF(documentFilePath string) (string, error) {
-	panic("implement me")
+func ConvertDocumentToPDF(documentFileName string) (string, error) {
+	documentFilePath := fmt.Sprintf("../samples/images/doc/%v", documentFileName)
+	output := fmt.Sprintf("../samples/pdf/out/docx_out.pdf")
+
+	inputFile, err := os.Open(documentFilePath)
+	if err != nil {
+		return "", fmt.Errorf("error opening document file: %v", err)
+	}
+	defer inputFile.Close()
+
+	command := fmt.Sprintf("pdfcpu convert - %s", output)
+
+	// Execute the command
+	cmd := exec.Command("sh", "-c", command)
+	cmd.Stdin = inputFile
+
+	err = cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("error converting document to PDF: %v. Output: %s", err, string(output))
+	}
+
+	return output, nil
 }
 
 // ConvertImageToPDF converts an image file to PDF using package gofpdf.
@@ -233,7 +259,7 @@ func ConvertImageToPDF(imageFileName string) (string, error) {
 	outputFile := fmt.Sprintf(util.ChangeFileExtension(imageFileOutput, "pdf"))
 	file, err := os.Open(imageFilePath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error reading image file: %v", err)
 	}
 	defer file.Close()
 
@@ -246,8 +272,14 @@ func ConvertImageToPDF(imageFileName string) (string, error) {
 	// Create a new PDF document
 	pdf := gofpdf.New("P", "mm", "A4", "")
 
+	// Set compression to true to reduce the file size.
+	pdf.SetCompression(true)
+
 	// Add a new page
 	pdf.AddPage()
+
+	// Change producer name
+	pdf.SetProducer("privyid", true)
 
 	// Calculate the aspect ratio of the image
 	aspectRatio := float64(img.Bounds().Dx()) / float64(img.Bounds().Dy())
@@ -266,7 +298,7 @@ func ConvertImageToPDF(imageFileName string) (string, error) {
 	// Save the PDF to the output file
 	err = pdf.OutputFileAndClose(outputFile)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error converting image to PDF: %v", err)
 	}
 
 	return outputFile, nil

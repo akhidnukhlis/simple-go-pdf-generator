@@ -16,16 +16,23 @@ func TestConvertImageToPDF(t *testing.T) {
 	assert.NotEmpty(t, doc)
 }
 
+func TestConvertDocumentToPDF(t *testing.T) {
+	doc, err := pdf.ConvertDocumentToPDF("sample.docx")
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, doc)
+}
+
 func TestAddQRCodeToPDF(t *testing.T) {
-	err := pdf.AddQRCodeToPDF("../samples/pdf/origin/doc.pdf", "qrcode-generate.png", "br")
+	err := pdf.AddQRCodeToPDF("../samples/pdf/origin/doc.pdf", "qrcode-with-icon.png", "br")
 
 	assert.NoError(t, err)
 }
 
 func TestProcessPDF(t *testing.T) {
-	pdfProcess := pdf.NewPDFGopher("doc.pdf",
-		pdf.WithOptionMetadataPDF(entity.OptionMetadataPDF{Title: "Hero life in You", Author: "Me as Author", Subject: "You as Subject"}),
-		pdf.WithOptionFilePDF(entity.OptionFilePDF{QRCodePath: "qrcode-generate.png", StampPosition: "c"}),
+	pdfProcess := pdf.NewPDFGopher("../samples/pdf/out/doc_out.pdf",
+		pdf.WithOptionMetadataPDF(entity.OptionMetadataPDF{Title: "Hero life in You", Author: "Me as Author", Subject: "You as Subject", Keywords: "Kopi Luwak"}),
+		pdf.WithOptionFilePDF(entity.OptionFilePDF{QRCodePath: "qrcode-with-icon.png", StampPosition: "tl"}),
 	)
 
 	// Process file
