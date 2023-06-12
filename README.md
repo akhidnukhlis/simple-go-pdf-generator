@@ -8,9 +8,11 @@ programs that are supported from the simple program code above
 1. create a qr-code (.png)
 2. add a favicon to the qr-code
 3. create a pdf file from an image
-4. add metadata to pdf files
-5. encrypt and decrypt pdf files
-6. add an image (qr-code) to the pdf file
+4. add metadata to pdf files (Tittle, Author, Description, Keywords)
+5. modify pdf producer 
+6. encrypt and decrypt pdf files 
+7. add an image (qr-code) to the pdf file
+8. convert docx to pdf using Ghostscript
 
 ### Built With
 

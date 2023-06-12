@@ -8,6 +8,7 @@ import (
 	entity "go-pdf-generator/entities"
 	util "go-pdf-generator/utils"
 	"image"
+	"log"
 	"os"
 	"os/exec"
 	"reflect"
@@ -226,28 +227,21 @@ func AddQRCodeToPDF(filePath string, qrCodeName string, stampPosition string) er
 }
 
 // ConvertDocumentToPDF converts a document file to PDF using pdfcpu-cli.
-func ConvertDocumentToPDF(documentFileName string) (string, error) {
-	documentFilePath := fmt.Sprintf("../samples/images/doc/%v", documentFileName)
-	output := fmt.Sprintf("../samples/pdf/out/docx_out.pdf")
+func ConvertDocumentToPDF(doxcName string) (string, error) {
+	docxPath := fmt.Sprintf("../samples/images/doc/%s", doxcName)
+	pdfPath := fmt.Sprintf("../samples/pdf/out/sample_docx.pdf")
 
-	inputFile, err := os.Open(documentFilePath)
-	if err != nil {
-		return "", fmt.Errorf("error opening document file: %v", err)
-	}
-	defer inputFile.Close()
+	command := fmt.Sprintf("gs -sDEVICE=pdfwrite -o %s %s", pdfPath, docxPath)
 
-	command := fmt.Sprintf("pdfcpu convert - %s", output)
-
-	// Execute the command
 	cmd := exec.Command("sh", "-c", command)
-	cmd.Stdin = inputFile
-
-	err = cmd.Run()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("error converting document to PDF: %v. Output: %s", err, string(output))
+		log.Fatalf("Failed to convert DOCX to PDF: %v\n%s", err, output)
 	}
 
-	return output, nil
+	log.Println("Conversion to PDF completed successfully.")
+
+	return pdfPath, nil
 }
 
 // ConvertImageToPDF converts an image file to PDF using package gofpdf.
