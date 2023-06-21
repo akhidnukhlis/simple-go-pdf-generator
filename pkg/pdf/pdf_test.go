@@ -1,9 +1,7 @@
 package pdf_test
 
 import (
-	"fmt"
-	entity "go-pdf-generator/entities"
-	"go-pdf-generator/pdf"
+	"simple-go-pdf-generator/pkg/pdf"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,14 +29,12 @@ func TestAddQRCodeToPDF(t *testing.T) {
 
 func TestProcessPDF(t *testing.T) {
 	pdfProcess := pdf.NewPDFGopher("../samples/pdf/out/doc_out.pdf",
-		pdf.WithOptionMetadataPDF(entity.OptionMetadataPDF{Title: "Hero life in You", Author: "Me as Author", Subject: "You as Subject", Keywords: "Kopi Luwak"}),
-		pdf.WithOptionFilePDF(entity.OptionFilePDF{QRCodePath: "qrcode-with-icon.png", StampPosition: "tl"}),
+		pdf.WithOptionMetadataPDF(pdf.OptionMetadataPDF{Title: "Hero life in You", Author: "Me as Author", Subject: "You as Subject", Keywords: "Kopi Luwak"}),
+		pdf.WithOptionFilePDF(pdf.OptionFilePDF{QRCodePath: "qrcode-with-icon.png", StampPosition: "tl"}),
 	)
 
 	// Process file
 	err := pdfProcess.ProcessFile()
-
-	fmt.Printf("pdfProcess.Base64Output: %v\n", pdfProcess.Base64Output)
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, pdfProcess.Base64Output)

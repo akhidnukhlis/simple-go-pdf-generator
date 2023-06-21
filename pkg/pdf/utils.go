@@ -1,8 +1,7 @@
-package util
+package pdf
 
 import (
 	"fmt"
-	entity "go-pdf-generator/entities"
 	"os/exec"
 	"path/filepath"
 	"reflect"
@@ -28,22 +27,22 @@ func IsStructEmpty(data interface{}) bool {
 }
 
 // GetFileType returns the type of file based on its extension.
-func GetFileType(filePath string) entity.FileType {
+func GetFileType(filePath string) FileType {
 	extension := strings.ToLower(filepath.Ext(filePath))
 	switch extension {
 	case ".pdf":
-		return entity.PDF
+		return PDF
 	case ".jpg", ".jpeg", ".png":
-		return entity.Image
+		return Image
 	case ".doc", ".docx":
-		return entity.Document
+		return Document
 	default:
 		return ""
 	}
 }
 
 // AddedMetadata to add metadata into a pdf file.
-func AddedMetadata(filePath string, metadata *entity.OptionMetadataPDF) error {
+func AddedMetadata(filePath string, metadata *OptionMetadataPDF) error {
 	command := fmt.Sprintf("pdfcpu properties add %s 'Title = %s' 'Author = %s' 'Subject = %s'", filePath, metadata.Title, metadata.Author, metadata.Subject)
 
 	// Execute the command
@@ -56,27 +55,13 @@ func AddedMetadata(filePath string, metadata *entity.OptionMetadataPDF) error {
 }
 
 // AddKeywords to add keywords into a pdf file.
-func AddKeywords(filePath string, metadata *entity.OptionMetadataPDF) error {
+func AddKeywords(filePath string, metadata *OptionMetadataPDF) error {
 	errs := removeKeywords(filePath)
 	if errs != nil {
 		return errs
 	}
 
 	command := fmt.Sprintf("pdfcpu keywords add %s '%s'", filePath, metadata.Keywords)
-
-	// Execute the command
-	cmd := exec.Command("sh", "-c", command)
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// removeKeywords to remove keywords into a pdf file.
-func removeKeywords(filePath string) error {
-	command := fmt.Sprintf("pdfcpu key remove '%s'", filePath)
 
 	// Execute the command
 	cmd := exec.Command("sh", "-c", command)
@@ -151,4 +136,18 @@ func ChangeFileExtension(filePath string, newExtension string) string {
 	fileNameWithoutExt := fileName[:len(fileName)-len(filepath.Ext(fileName))]
 	newFileName := fileNameWithoutExt + "." + newExtension
 	return filepath.Join(filepath.Dir(filePath), newFileName)
+}
+
+// removeKeywords to remove keywords into a pdf file.
+func removeKeywords(filePath string) error {
+	command := fmt.Sprintf("pdfcpu key remove '%s'", filePath)
+
+	// Execute the command
+	cmd := exec.Command("sh", "-c", command)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

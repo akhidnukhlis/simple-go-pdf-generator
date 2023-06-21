@@ -1,14 +1,13 @@
-package util_test
+package pdf_test
 
 import (
 	"github.com/stretchr/testify/assert"
-	entity "go-pdf-generator/entities"
-	util "go-pdf-generator/utils"
+	util "simple-go-pdf-generator/pkg/pdf"
 	"testing"
 )
 
 func TestIsStructEmpty(t *testing.T) {
-	result := util.IsStructEmpty(&entity.OptionMetadataPDF{
+	result := util.IsStructEmpty(&util.OptionMetadataPDF{
 		Title:   "",
 		Author:  "",
 		Subject: "",
@@ -21,7 +20,7 @@ func TestIsStructEmpty(t *testing.T) {
 func TestGetFileType(t *testing.T) {
 	result := util.GetFileType("doc.jpg")
 
-	expectImage := entity.Image
+	expectImage := util.Image
 
 	assert.Equal(t, expectImage, result)
 	assert.NotEmpty(t, result)
@@ -37,7 +36,7 @@ func TestChangeFileExtension(t *testing.T) {
 }
 
 func TestAddedMetadata(t *testing.T) {
-	err := util.AddedMetadata("../samples/pdf/origin/doc.pdf", &entity.OptionMetadataPDF{
+	err := util.AddedMetadata("../samples/pdf/origin/doc.pdf", &util.OptionMetadataPDF{
 		Title:   "Test Tittle",
 		Author:  "Test Author",
 		Subject: "Test Subject",
@@ -47,7 +46,7 @@ func TestAddedMetadata(t *testing.T) {
 }
 
 func TestAddedKeywords(t *testing.T) {
-	err := util.AddKeywords("../samples/pdf/origin/doc.pdf", &entity.OptionMetadataPDF{
+	err := util.AddKeywords("../samples/pdf/origin/doc.pdf", &util.OptionMetadataPDF{
 		Keywords: "Test Keywords",
 	})
 

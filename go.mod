@@ -1,4 +1,4 @@
-module go-pdf-generator
+module simple-go-pdf-generator
 
 go 1.20
 
