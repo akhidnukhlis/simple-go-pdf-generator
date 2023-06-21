@@ -16,7 +16,7 @@ func QrCodeGen(t string, filename string) error {
 	qrCode, _ = barcode.Scale(qrCode, 2000, 2000)
 
 	// Save file to different directory
-	fileDir := fmt.Sprintf("../samples/images/qr/%v", filename)
+	fileDir := fmt.Sprintf("./samples/images/qr/%v", filename)
 
 	// create the output file
 	file, err := os.Create(fileDir)

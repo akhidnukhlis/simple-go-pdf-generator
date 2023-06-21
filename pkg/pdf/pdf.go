@@ -5,14 +5,37 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jung-kurt/gofpdf"
-	entity "go-pdf-generator/entities"
-	util "go-pdf-generator/utils"
 	"image"
 	"log"
 	"os"
 	"os/exec"
 	"reflect"
 )
+
+// FileType represents the type of file.
+type FileType string
+
+// Constants for different file types.
+const (
+	PDF      FileType = "pdf"
+	Image    FileType = "image"
+	Document FileType = "document"
+)
+
+// OptionMetadataPDF represents options for modifying PDF metadata.
+type OptionMetadataPDF struct {
+	Title    string
+	Author   string
+	Subject  string
+	Keywords string
+}
+
+// OptionFilePDF represents options for working with PDF files.
+type OptionFilePDF struct {
+	PasswordPDF   string
+	QRCodePath    string
+	StampPosition string
+}
 
 // Option is a function type used for applying options to a PDFProcessor.
 // It takes a pointer to a PDFProcessor and modifies it according to the provided option.
@@ -23,18 +46,18 @@ type PdfProcessor struct {
 	FilePath      string
 	Base64Output  string
 	PDFProtection bool
-	*entity.OptionFilePDF
-	*entity.OptionMetadataPDF
+	*OptionFilePDF
+	*OptionMetadataPDF
 }
 
 // NewPDFGopher constructor to retrieve struct PDFProcessor
 func NewPDFGopher(filePath string, options ...Option) *PdfProcessor {
 	option := &PdfProcessor{
 		FilePath: filePath,
-		OptionFilePDF: &entity.OptionFilePDF{
+		OptionFilePDF: &OptionFilePDF{
 			StampPosition: "br",
 		},
-		OptionMetadataPDF: &entity.OptionMetadataPDF{},
+		OptionMetadataPDF: &OptionMetadataPDF{},
 	}
 
 	for _, opt := range options {
@@ -45,14 +68,14 @@ func NewPDFGopher(filePath string, options ...Option) *PdfProcessor {
 }
 
 // WithOptionMetadataPDF returns an Option function that sets the OptionMetadataPDF value.
-func WithOptionMetadataPDF(value entity.OptionMetadataPDF) Option {
+func WithOptionMetadataPDF(value OptionMetadataPDF) Option {
 	return func(p *PdfProcessor) {
 		p.OptionMetadataPDF = &value
 	}
 }
 
 // WithOptionFilePDF returns an Option function that sets the OptionFilePDF value.
-func WithOptionFilePDF(value entity.OptionFilePDF) Option {
+func WithOptionFilePDF(value OptionFilePDF) Option {
 	return func(p *PdfProcessor) {
 		v := reflect.ValueOf(value)
 		for i := 0; i < v.NumField(); i++ {
@@ -66,11 +89,11 @@ func WithOptionFilePDF(value entity.OptionFilePDF) Option {
 
 // ProcessFile processes the input file based on its type.
 func (p *PdfProcessor) ProcessFile() error {
-	fileType := util.GetFileType(p.FilePath)
+	fileType := GetFileType(p.FilePath)
 	switch fileType {
-	case entity.PDF:
+	case PDF:
 		// Check if the PDF file has a password
-		hasPassword, err := util.HasPDFPassword(p.FilePath, p.PasswordPDF)
+		hasPassword, err := HasPDFPassword(p.FilePath, p.PasswordPDF)
 		if err != nil {
 			return err
 		}
@@ -79,7 +102,7 @@ func (p *PdfProcessor) ProcessFile() error {
 
 		if hasPassword {
 			// Decrypt the PDF File
-			err := util.Decrypted(p.FilePath, p.PasswordPDF)
+			err := Decrypted(p.FilePath, p.PasswordPDF)
 			if err != nil {
 				return err
 			}
@@ -90,7 +113,7 @@ func (p *PdfProcessor) ProcessFile() error {
 		if err != nil {
 			return err
 		}
-	case entity.Image:
+	case Image:
 		// Convert the image file to PDF
 		pdfFilePath, err := ConvertImageToPDF(p.FilePath)
 		if err != nil {
@@ -102,7 +125,7 @@ func (p *PdfProcessor) ProcessFile() error {
 		if err != nil {
 			return err
 		}
-	case entity.Document:
+	case Document:
 		// Convert the document file to PDF
 		pdfFilePath, err := ConvertDocumentToPDF(p.FilePath)
 		if err != nil {
@@ -152,13 +175,13 @@ func (p *PdfProcessor) processPDF(filePath string, qrCode string, stampPosition 
 	}
 
 	//add metadata to file pdf
-	if !util.IsStructEmpty(p.OptionMetadataPDF) {
-		err := util.AddedMetadata(filePath, p.OptionMetadataPDF)
+	if !IsStructEmpty(p.OptionMetadataPDF) {
+		err := AddedMetadata(filePath, p.OptionMetadataPDF)
 		if err != nil {
 			return err
 		}
 
-		errs := util.AddKeywords(filePath, p.OptionMetadataPDF)
+		errs := AddKeywords(filePath, p.OptionMetadataPDF)
 		if errs != nil {
 			return errs
 		}
@@ -166,7 +189,7 @@ func (p *PdfProcessor) processPDF(filePath string, qrCode string, stampPosition 
 
 	//add protection to file pdf
 	if p.PDFProtection {
-		err := util.Encrypted(filePath, p.OptionFilePDF.PasswordPDF)
+		err := Encrypted(filePath, p.OptionFilePDF.PasswordPDF)
 		if err != nil {
 			return err
 		}
@@ -187,7 +210,7 @@ func AddQRCodeToPDF(filePath string, qrCodeName string, stampPosition string) er
 		return errors.New("QR Code is empty")
 	}
 
-	qrCode := fmt.Sprintf("../samples/images/qr/%v", qrCodeName)
+	qrCode := fmt.Sprintf("./samples/images/qr/%v", qrCodeName)
 
 	// Load the icon image
 	iconFile, err := os.Open(qrCode)
@@ -200,7 +223,7 @@ func AddQRCodeToPDF(filePath string, qrCodeName string, stampPosition string) er
 	}
 	defer iconFile.Close()
 
-	fileOutput := fmt.Sprintf("../samples/pdf/out/doc_out.pdf")
+	fileOutput := fmt.Sprintf("./samples/pdf/out/doc_out.pdf")
 
 	command := fmt.Sprintf("pdfcpu stamp add -pages even,odd  -mode image -- '%s' 'pos:%s, rot:0, sc:.1' %s %s", iconFile.Name(), stampPosition, filePath, fileOutput)
 
@@ -228,16 +251,16 @@ func AddQRCodeToPDF(filePath string, qrCodeName string, stampPosition string) er
 
 // ConvertDocumentToPDF converts a document file to PDF using pdfcpu-cli.
 func ConvertDocumentToPDF(doxcName string) (string, error) {
-	docxPath := fmt.Sprintf("../samples/images/doc/%s", doxcName)
-	pdfPath := fmt.Sprintf("../samples/pdf/out/sample_docx.pdf")
+	docxPath := fmt.Sprintf("./samples/images/doc/%s", doxcName)
+	pdfPath := fmt.Sprintf("./samples/pdf/out/sample_docx.pdf")
 
-	command := fmt.Sprintf("gs -sDEVICE=pdfwrite -o %s %s", pdfPath, docxPath)
-
+	command := fmt.Sprintf("soffice --headless --convert-to pdf %s --outdir %s", docxPath, pdfPath)
 	cmd := exec.Command("sh", "-c", command)
-	output, err := cmd.CombinedOutput()
+	err := cmd.Run()
 	if err != nil {
-		log.Fatalf("Failed to convert DOCX to PDF: %v\n%s", err, output)
+		return "", err
 	}
+	return pdfPath, nil
 
 	log.Println("Conversion to PDF completed successfully.")
 
@@ -246,11 +269,11 @@ func ConvertDocumentToPDF(doxcName string) (string, error) {
 
 // ConvertImageToPDF converts an image file to PDF using package gofpdf.
 func ConvertImageToPDF(imageFileName string) (string, error) {
-	imageFilePath := fmt.Sprintf("../samples/images/doc/%s", imageFileName)
-	imageFileOutput := fmt.Sprintf("../samples/pdf/origin/%s", imageFileName)
+	imageFilePath := fmt.Sprintf("./samples/images/doc/%s", imageFileName)
+	imageFileOutput := fmt.Sprintf("./samples/pdf/origin/%s", imageFileName)
 
 	// Open the input image file
-	outputFile := fmt.Sprintf(util.ChangeFileExtension(imageFileOutput, "pdf"))
+	outputFile := fmt.Sprintf(ChangeFileExtension(imageFileOutput, "pdf"))
 	file, err := os.Open(imageFilePath)
 	if err != nil {
 		return "", fmt.Errorf("error reading image file: %v", err)
@@ -273,7 +296,7 @@ func ConvertImageToPDF(imageFileName string) (string, error) {
 	pdf.AddPage()
 
 	// Change producer name
-	pdf.SetProducer("privyid", true)
+	pdf.SetProducer("akhidnukhlis", true)
 
 	// Calculate the aspect ratio of the image
 	aspectRatio := float64(img.Bounds().Dx()) / float64(img.Bounds().Dy())
