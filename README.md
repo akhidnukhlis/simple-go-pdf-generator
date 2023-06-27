@@ -1,4 +1,4 @@
-# simple-go-pdf-generator
+# simple-pdf-generator-golang
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -37,7 +37,7 @@ This is how to list things you need to use the software and how to install them.
 
 1. Clone repo author-service
    ```sh
-   git clone https://github.com/akhidnukhlis/simple-go-pdf-generator
+   git clone https://github.com/akhidnukhlis/simple-pdf-generator-golang
    ```
    
 2. Run command golang
