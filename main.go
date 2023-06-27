@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
-	"simple-go-pdf-generator/pkg/pdf"
-	"simple-go-pdf-generator/pkg/qr_codes"
+	"simple-pdf-generator-golang/pkg/pdf"
+	"simple-pdf-generator-golang/pkg/qr_codes"
 )
 
 func main() {
-	key := "simple-go-pdf-generator"
-	text := fmt.Sprintf("https://github.com/akhidnukhlis/simple-go-pdf-generator/%s", key)
+	key := "simple-pdf-generator-golang"
+	text := fmt.Sprintf("https://github.com/akhidnukhlis/simple-pdf-generator-golang/%s", key)
 
 	if err := qr_codes.QrCodeGen(text, "qrcode-without-icon.png"); err != nil {
 		log.Fatalf("gagal membuat qr-codes: %s", err)

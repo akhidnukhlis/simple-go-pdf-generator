@@ -1,7 +1,7 @@
 package pdf_test
 
 import (
-	"simple-go-pdf-generator/pkg/pdf"
+	"simple-pdf-generator-golang/pkg/pdf"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
